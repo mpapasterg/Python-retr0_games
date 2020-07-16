@@ -21,10 +21,11 @@ bottom_offset = 10
 
 # Pause Menu
 
-def pause_select(x, y):
-    global paused
+def select(x, y):
+    global paused, current_time
     if -60 < x < 60 and (height / 2) - 140 < y < (height / 2) - 100:
         paused = 0
+        current_time = time.time()
         return
     elif -60 < x < 60 and (height / 2) - 200 < y < (height / 2) - 160:
         wn.bye()
@@ -64,7 +65,7 @@ def pause():
     pause_pen.penup()
 
     wn.listen()
-    wn.onclick(pause_select)
+    wn.onclick(select)
 
     while paused:
         wn.update()
@@ -76,11 +77,111 @@ def pause():
     ball.showturtle()
 
 
+# Start Menu
+
+def start():
+    global paused
+    paused = 1
+
+    pause_pen = turtle.Turtle()
+    pause_pen.hideturtle()
+    pause_pen.pencolor("white")
+    pause_pen.penup()
+
+    pause_pen.goto(0, (height / 2) - 60)
+    pause_pen.write("PONG", align="center", font=("Courier", 24, "bold"))
+    pause_pen.goto(0, (height / 2) - 120)
+    pause_pen.write("Start", align="center", font=("Courier", 24, "normal"))
+    pause_pen.goto(0, (height / 2) - 180)
+    pause_pen.write("Quit", align="center", font=("Courier", 24, "normal"))
+
+    wn.listen()
+    wn.onclick(select)
+
+    while paused:
+        wn.update()
+
+    wn.onclick(None)
+    pause_pen.clear()
+
+
+# Game Function
+
+def game():
+    wn.update()
+
+    if ball.ycor() + ball.dy >= (height / 2) - 10:
+        ball.sety((height / 2) - 10)
+        ball.dy *= -1
+    elif ball.ycor() + ball.dy <= - (height / 2) + 10 + bottom_offset:
+        ball.sety(- (height / 2) + 10 + bottom_offset)
+        ball.dy *= -1
+    else:
+        ball.sety(ball.ycor() + ball.dy)
+
+    if ball.xcor() + ball.dx >= (width / 2) - 10:
+        ball.dx *= -1
+        paddle_a.score += 1
+        pen.clear()
+        pen.goto(0, (height / 2) - 60)
+        pen.write("Player A: {}  Player B: {}".format(paddle_a.score, paddle_b.score), align="center",
+                  font=("Courier", 24, "normal"))
+        ball.goto(0, 0)
+    elif ball.xcor() + ball.dx <= - (width / 2) + 10:
+        ball.dx *= -1
+        paddle_b.score += 1
+        pen.clear()
+        pen.goto(0, (height / 2) - 60)
+        pen.write("Player A: {}  Player B: {}".format(paddle_a.score, paddle_b.score), align="center",
+                  font=("Courier", 24, "normal"))
+        ball.goto(0, 0)
+    elif ball.xcor() + ball.dx >= paddle_b.xcor() - 20 \
+            and paddle_b.ycor() + 50 > ball.ycor() > paddle_b.ycor() - 50:
+        ball.setx(paddle_b.xcor() - 20)
+        ball.dx *= -1
+    elif ball.xcor() + ball.dx <= paddle_a.xcor() + 20 \
+            and paddle_a.ycor() + 40 > ball.ycor() > paddle_a.ycor() - 40:
+        ball.setx(paddle_a.xcor() + 20)
+        ball.dx *= -1
+    else:
+        ball.setx(ball.xcor() + ball.dx)
+
+
+# Movement Functions
+
+def paddle_a_up():
+    if paddle_a.ycor() >= (height / 2) - 80:
+        return
+    else:
+        paddle_a.sety(paddle_a.ycor() + 20)
+
+
+def paddle_a_down():
+    if paddle_a.ycor() <= - (height / 2) + 80:
+        return
+    else:
+        paddle_a.sety(paddle_a.ycor() - 20)
+
+
+def paddle_b_up():
+    if paddle_b.ycor() >= (height / 2) - 80:
+        return
+    else:
+        paddle_b.sety(paddle_b.ycor() + 20)
+
+
+def paddle_b_down():
+    if paddle_b.ycor() <= - (height / 2) + 80:
+        return
+    else:
+        paddle_b.sety(paddle_b.ycor() - 20)
+
+
 # FPS System
 
 current_frame = 0
 fps = 20000000
-current_time = time.time()
+current_time = 0
 
 
 def tick(fps_requested=60):
@@ -101,6 +202,10 @@ wn.title("Pong game")
 wn.bgcolor("black")
 wn.setup(width=width, height=height)
 wn.tracer(0)
+
+# Start Game
+
+start()
 
 # Score Print
 
@@ -145,37 +250,6 @@ ball.goto(0, 0)
 ball.dx = width / 1000
 ball.dy = height / 1000
 
-
-# Functions
-
-def paddle_a_up():
-    if paddle_a.ycor() >= (height / 2) - 80:
-        return
-    else:
-        paddle_a.sety(paddle_a.ycor() + 20)
-
-
-def paddle_a_down():
-    if paddle_a.ycor() <= - (height / 2) + 80:
-        return
-    else:
-        paddle_a.sety(paddle_a.ycor() - 20)
-
-
-def paddle_b_up():
-    if paddle_b.ycor() >= (height / 2) - 80:
-        return
-    else:
-        paddle_b.sety(paddle_b.ycor() + 20)
-
-
-def paddle_b_down():
-    if paddle_b.ycor() <= - (height / 2) + 80:
-        return
-    else:
-        paddle_b.sety(paddle_b.ycor() - 20)
-
-
 # Key Binding
 
 wn.listen()
@@ -184,50 +258,6 @@ wn.onkeypress(paddle_a_down, "s")
 wn.onkeypress(paddle_b_up, "Up")
 wn.onkeypress(paddle_b_down, "Down")
 wn.onkeypress(pause, "Escape")
-
-
-# Game Function
-
-
-def game():
-    wn.update()
-
-    if ball.ycor() + ball.dy >= (height / 2) - 10:
-        ball.sety((height / 2) - 10)
-        ball.dy *= -1
-    elif ball.ycor() + ball.dy <= - (height / 2) + 10 + bottom_offset:
-        ball.sety(- (height / 2) + 10 + bottom_offset)
-        ball.dy *= -1
-    else:
-        ball.sety(ball.ycor() + ball.dy)
-
-    if ball.xcor() + ball.dx >= (width / 2) - 10:
-        ball.dx *= -1
-        paddle_a.score += 1
-        pen.clear()
-        pen.goto(0, (height / 2) - 60)
-        pen.write("Player A: {}  Player B: {}".format(paddle_a.score, paddle_b.score), align="center",
-                  font=("Courier", 24, "normal"))
-        ball.goto(0, 0)
-    elif ball.xcor() + ball.dx <= - (width / 2) + 10:
-        ball.dx *= -1
-        paddle_b.score += 1
-        pen.clear()
-        pen.goto(0, (height / 2) - 60)
-        pen.write("Player A: {}  Player B: {}".format(paddle_a.score, paddle_b.score), align="center",
-                  font=("Courier", 24, "normal"))
-        ball.goto(0, 0)
-    elif ball.xcor() + ball.dx >= paddle_b.xcor() - 20 \
-            and paddle_b.ycor() + 50 > ball.ycor() > paddle_b.ycor() - 50:
-        ball.setx(paddle_b.xcor() - 20)
-        ball.dx *= -1
-    elif ball.xcor() + ball.dx <= paddle_a.xcor() + 20 \
-            and paddle_a.ycor() + 40 > ball.ycor() > paddle_a.ycor() - 40:
-        ball.setx(paddle_a.xcor() + 20)
-        ball.dx *= -1
-    else:
-        ball.setx(ball.xcor() + ball.dx)
-
 
 # Game loop
 
