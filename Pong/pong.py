@@ -4,6 +4,77 @@
 import turtle
 import time
 
+# Global Variables
+
+paused = 0
+
+# Dimensions of Window
+
+width = 800
+height = 600
+
+# Turtle screen boundaries allow for some bottom offset from expected pixel output.
+# This is fixed by adding the following when needed
+
+bottom_offset = 10
+
+
+# Pause Menu
+
+def pause_select(x, y):
+    global paused
+    if -60 < x < 60 and (height / 2) - 140 < y < (height / 2) - 100:
+        paused = 0
+        return
+    elif -60 < x < 60 and (height / 2) - 200 < y < (height / 2) - 160:
+        wn.bye()
+        return
+    else:
+        return
+
+
+def pause():
+    global paused, paddle_a, paddle_b, ball
+    paused = 1
+
+    paddle_a.hideturtle()
+    paddle_b.hideturtle()
+    ball.hideturtle()
+
+    pause_pen = turtle.Turtle()
+    pause_pen.hideturtle()
+    pause_pen.pencolor("white")
+    pause_pen.fillcolor("#000000")
+    pause_pen.penup()
+    pause_pen.begin_fill()
+    pause_pen.begin_poly()
+    pause_pen.goto(- (width / 2), - (height / 2))
+    pause_pen.goto(width / 2, - (height / 2))
+    pause_pen.goto(width / 2, height / 2)
+    pause_pen.goto(- (width / 2), height / 2)
+    pause_pen.end_poly()
+    pause_pen.end_fill()
+
+    pause_pen.goto(0, (height / 2) - 60)
+    pause_pen.write("PONG", align="center", font=("Courier", 24, "bold"))
+    pause_pen.goto(0, (height / 2) - 120)
+    pause_pen.write("Resume", align="center", font=("Courier", 24, "normal"))
+    pause_pen.goto(0, (height / 2) - 180)
+    pause_pen.write("Quit", align="center", font=("Courier", 24, "normal"))
+    pause_pen.penup()
+
+    wn.listen()
+    wn.onclick(pause_select)
+
+    while paused:
+        wn.update()
+
+    wn.onclick(None)
+    pause_pen.clear()
+    paddle_a.showturtle()
+    paddle_b.showturtle()
+    ball.showturtle()
+
 
 # FPS System
 
@@ -17,21 +88,13 @@ def tick(fps_requested=60):
     n = fps / fps_requested
     current_frame += n
     while n > 0:
-        n -= 1
+        if not paused:
+            n -= 1
     if time.time() - current_time > 1:
         current_time = time.time()
         fps = current_frame
         current_frame = 0
 
-
-# Dimensions of Window
-
-width = 800
-height = 600
-
-# Turtle screen boundaries allow for some bottom offset from expected pixel output.
-# This is fixed by adding the following when needed
-bottom_offset = 10
 
 wn = turtle.Screen()
 wn.title("Pong game")
@@ -47,7 +110,7 @@ pen.color("white")
 pen.penup()
 pen.hideturtle()
 pen.goto(0, (height / 2) - 60)
-pen.write("Player A: 0 Player B: 0", align="center", font=("Courier", 24, "bold"))
+pen.write("Player A: 0 Player B: 0", align="center", font=("Courier", 24, "normal"))
 
 # Paddle A
 
@@ -120,7 +183,10 @@ wn.onkeypress(paddle_a_up, "w")
 wn.onkeypress(paddle_a_down, "s")
 wn.onkeypress(paddle_b_up, "Up")
 wn.onkeypress(paddle_b_down, "Down")
-wn.onkeypress(wn.bye, "Escape")
+wn.onkeypress(pause, "Escape")
+
+
+# Game Function
 
 
 def game():
@@ -139,6 +205,7 @@ def game():
         ball.dx *= -1
         paddle_a.score += 1
         pen.clear()
+        pen.goto(0, (height / 2) - 60)
         pen.write("Player A: {}  Player B: {}".format(paddle_a.score, paddle_b.score), align="center",
                   font=("Courier", 24, "normal"))
         ball.goto(0, 0)
@@ -146,6 +213,7 @@ def game():
         ball.dx *= -1
         paddle_b.score += 1
         pen.clear()
+        pen.goto(0, (height / 2) - 60)
         pen.write("Player A: {}  Player B: {}".format(paddle_a.score, paddle_b.score), align="center",
                   font=("Courier", 24, "normal"))
         ball.goto(0, 0)
