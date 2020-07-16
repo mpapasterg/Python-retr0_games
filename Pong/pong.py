@@ -18,16 +18,22 @@ height = 600
 
 bottom_offset = 10
 
+# Rendering Variables
+
+current_frame = 0
+fps = 20000000
+current_time = 0
+
 
 # Pause Menu
 
 def select(x, y):
     global paused, current_time
-    if -60 < x < 60 and (height / 2) - 140 < y < (height / 2) - 100:
+    if -60 < x < 60 and (height / 2) - 120 < y < (height / 2) - 80:
         paused = 0
         current_time = time.time()
         return
-    elif -60 < x < 60 and (height / 2) - 200 < y < (height / 2) - 160:
+    elif -60 < x < 60 and (height / 2) - 180 < y < (height / 2) - 140:
         wn.bye()
         return
     else:
@@ -35,40 +41,50 @@ def select(x, y):
 
 
 def pause():
-    global paused, paddle_a, paddle_b, ball
-    paused = 1
-
-    paddle_a.hideturtle()
-    paddle_b.hideturtle()
-    ball.hideturtle()
-
+    global paused, current_time, paddle_a, paddle_b, ball
     pause_pen = turtle.Turtle()
     pause_pen.hideturtle()
-    pause_pen.pencolor("white")
-    pause_pen.fillcolor("#000000")
-    pause_pen.penup()
-    pause_pen.begin_fill()
-    pause_pen.begin_poly()
-    pause_pen.goto(- (width / 2), - (height / 2))
-    pause_pen.goto(width / 2, - (height / 2))
-    pause_pen.goto(width / 2, height / 2)
-    pause_pen.goto(- (width / 2), height / 2)
-    pause_pen.end_poly()
-    pause_pen.end_fill()
 
-    pause_pen.goto(0, (height / 2) - 60)
-    pause_pen.write("PONG", align="center", font=("Courier", 24, "bold"))
-    pause_pen.goto(0, (height / 2) - 120)
-    pause_pen.write("Resume", align="center", font=("Courier", 24, "normal"))
-    pause_pen.goto(0, (height / 2) - 180)
-    pause_pen.write("Quit", align="center", font=("Courier", 24, "normal"))
-    pause_pen.penup()
+    if not paused:
+        # Pause
 
-    wn.listen()
-    wn.onclick(select)
+        paused = 1
 
-    while paused:
-        wn.update()
+        paddle_a.hideturtle()
+        paddle_b.hideturtle()
+        ball.hideturtle()
+
+        pause_pen.pencolor("white")
+        pause_pen.fillcolor("#000000")
+        pause_pen.penup()
+        pause_pen.begin_fill()
+        pause_pen.begin_poly()
+        pause_pen.goto(- (width / 2), - (height / 2))
+        pause_pen.goto(width / 2, - (height / 2))
+        pause_pen.goto(width / 2, height / 2)
+        pause_pen.goto(- (width / 2), height / 2)
+        pause_pen.end_poly()
+        pause_pen.end_fill()
+
+        pause_pen.goto(0, (height / 2) - 60)
+        pause_pen.write("PONG", align="center", font=("Courier", 24, "bold"))
+        pause_pen.goto(0, (height / 2) - 120)
+        pause_pen.write("Resume", align="center", font=("Courier", 24, "normal"))
+        pause_pen.goto(0, (height / 2) - 180)
+        pause_pen.write("Quit", align="center", font=("Courier", 24, "normal"))
+        pause_pen.penup()
+
+        wn.listen()
+        wn.onclick(select)
+
+        while paused:
+            wn.update()
+    else:
+
+        # Resume
+
+        paused = 0
+        current_time = time.time()
 
     wn.onclick(None)
     pause_pen.clear()
@@ -179,11 +195,6 @@ def paddle_b_down():
 
 # FPS System
 
-current_frame = 0
-fps = 20000000
-current_time = 0
-
-
 def tick(fps_requested=60):
     global current_frame, fps, current_time
     n = fps / fps_requested
@@ -197,6 +208,10 @@ def tick(fps_requested=60):
         current_frame = 0
 
 
+# Initialise Game
+
+print("Starting Pong on resolution: ", width, "x", height, "\nFixed FPS: ", fps, "...")
+
 wn = turtle.Screen()
 wn.title("Pong game")
 wn.bgcolor("black")
@@ -205,6 +220,7 @@ wn.tracer(0)
 
 # Start Game
 
+print("Started!")
 start()
 
 # Score Print
