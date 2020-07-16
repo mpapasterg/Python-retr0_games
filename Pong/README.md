@@ -5,7 +5,9 @@ The game can be played with two human players using W/S keys(Player A) and Up/Do
 Use Escape key or close the program to exit the game.
 
 You can play the Pong game by simply downloading the "pong.py" file and executing the following command inside a terminal:
-`python pong.py`
+```
+python pong.py
+```
 Python 3.0 or higher is required for the program to run.
 
 The present implementation of the classic Pong game is part of the retr0_games Python game list by mpapasterg. 
