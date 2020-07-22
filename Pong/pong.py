@@ -221,6 +221,7 @@ wn.tracer(0)
 # Start Game
 
 print("Started!")
+
 start()
 
 # Score Print
